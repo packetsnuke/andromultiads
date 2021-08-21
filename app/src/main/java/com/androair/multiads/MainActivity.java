@@ -1,76 +1,74 @@
 package com.androair.multiads;
 
-import android.os.Bundle;
+import static com.androair.multiads.AdsSetting.HPK1;
+import static com.androair.multiads.AdsSetting.HPK2;
+import static com.androair.multiads.AdsSetting.HPK3;
+import static com.androair.multiads.AdsSetting.HPK4;
+import static com.androair.multiads.AdsSetting.HPK5;
+import static com.androair.multiads.AdsSetting.INITIALIZE_SDK;
+import static com.androair.multiads.AdsSetting.MAIN_ADS_BANNER;
+import static com.androair.multiads.AdsSetting.MAIN_ADS_REWARDS;
+import static com.androair.multiads.AdsSetting.NATIVE_ADS_ADMOB;
+import static com.androair.multiads.AdsSetting.SELECT_ADS;
 
-import com.google.android.material.snackbar.Snackbar;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.view.View;
-
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.androair.multiads.databinding.ActivityMainBinding;
-
-import android.view.Menu;
-import android.view.MenuItem;
+import com.androair.andromultiads.AndroAdsGDPR;
+import com.androair.andromultiads.AndroAdsOpenAds;
+import com.androair.andromultiads.AndroAdsBanner;
+import com.androair.andromultiads.AndroAdsInitialize;
+import com.androair.andromultiads.AndroAdsInterstitial;
+import com.androair.andromultiads.AndroAdsNative;
+import com.androair.andromultiads.AndroAdsReward;
 
 public class MainActivity extends AppCompatActivity {
-
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        setSupportActionBar(binding.toolbar);
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        RelativeLayout layAds = findViewById(R.id.layAds);
+        FrameLayout nativeads = findViewById(R.id.laynative);
+        RelativeLayout layAdsmall = findViewById(R.id.laysAdsmall);
+        AndroAdsGDPR.loadGdpr(MainActivity.this,SELECT_ADS,true);
+        AndroAdsInitialize.SelectAds(MainActivity.this, AdsSetting.SELECT_ADS, INITIALIZE_SDK);
+        AndroAdsBanner.MediumBanner(MainActivity.this, layAds,AdsSetting.SELECT_ADS, AdsSetting.MAIN_ADS_BANNER,HPK1
+                ,HPK2,HPK3,HPK4,HPK5);
+        AndroAdsBanner.SmallBanner(MainActivity.this, layAdsmall,AdsSetting.SELECT_ADS, AdsSetting.MAIN_ADS_BANNER,HPK1
+                ,HPK2,HPK3,HPK4,HPK5);
+        AndroAdsInterstitial.LoadIntertitial(MainActivity.this, AdsSetting.SELECT_ADS, AdsSetting.MAIN_ADS_INTERTITIAL,HPK1
+                ,HPK2,HPK3,HPK4,HPK5 );
+        AndroAdsNative.SmallNativeAdmob(MainActivity.this,SELECT_ADS, AdsSetting.BACKUP_ADS, nativeads, NATIVE_ADS_ADMOB,MAIN_ADS_BANNER, HPK1
+                ,HPK2,HPK3,HPK4,HPK5);
+        AndroAdsReward.LoadReward(MainActivity.this, SELECT_ADS, MAIN_ADS_REWARDS );
+        AndroAdsOpenAds.ShowOpen(MainActivity.this);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    public void showads(View view){
+        AndroAdsInterstitial.ShowIntertitial(MainActivity.this,AdsSetting.SELECT_ADS,
+                AdsSetting.MAIN_ADS_INTERTITIAL, 0,HPK1
+                ,HPK2,HPK3,HPK4,HPK5);
+
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    public void showreward(View view){
+        AndroAdsReward.ShowReward(MainActivity.this,SELECT_ADS,MAIN_ADS_REWARDS);
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    }
+
+    public void onResume(){
+        super.onResume();
+        if (AndroAdsReward.unlockreward){
+            Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+
+        } else {
+            Toast.makeText(getApplicationContext(), "Failed", Toast.LENGTH_LONG).show();
         }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
     }
 }
